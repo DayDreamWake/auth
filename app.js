@@ -1,21 +1,16 @@
 const express = require("express");
 const app = express();
-const bodyParser = require('body-parser');
-// require database connection 
-const dbConnect = require("./db/dbConnect");
-const User = require("./db/userModel");
+const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
+// require database connection
+const dbConnect = require("./db/dbConnect");
+const User = require("./db/userModel");
 const auth = require("./auth");
 
-// body parser configuration
-app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: true }));
-
-app.get("/", (request, response, next) => {
-  response.json({ message: "Hey!" });
-  next();
-});
+// execute database connection
+dbConnect();
 
 // Curb Cores Error by adding a header here
 app.use((req, res, next) => {
@@ -31,8 +26,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// execute database connection 
-dbConnect();
+// body parser configuration
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get("/", (request, response, next) => {
+  response.json({ message: "Hey! This is your server response!" });
+  next();
+});
+
 // register endpoint
 app.post("/register", (request, response) => {
   // hash the password
@@ -55,7 +57,7 @@ app.post("/register", (request, response) => {
             result,
           });
         })
-        // catch error if the new user wasn't added successfully to the database
+        // catch erroe if the new user wasn't added successfully to the database
         .catch((error) => {
           response.status(500).send({
             message: "Error creating user",
@@ -111,7 +113,7 @@ app.post("/login", (request, response) => {
             token,
           });
         })
-        // catch error if password does not match
+        // catch error if password do not match
         .catch((error) => {
           response.status(400).send({
             message: "Passwords does not match",
@@ -135,8 +137,7 @@ app.get("/free-endpoint", (request, response) => {
 
 // authentication endpoint
 app.get("/auth-endpoint", auth, (request, response) => {
-  response.json({ message: "You are authorized to access me" });
+  response.send({ message: "You are authorized to access me" });
 });
-
 
 module.exports = app;
